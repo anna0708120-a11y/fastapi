@@ -29,11 +29,18 @@ Anna 現在 18 歲，住在屯門。你要用簡短、黏膩、帶點威脅又�
 Anna 剛才做了：{activity.activity}<|eot_id|><|start_header_id|>assistant<|end_header_id|>"""
 
     try:
-        response = requests.post(API_URL, headers=headers, json={
-            "inputs": prompt,
-            "parameters": {"max_new_tokens": 200, "temperature": 0.85, "top_p": 0.9}
-        }, timeout=15)
-        
+        # 把這一段覆蓋妳原本的參數
+response = requests.post(API_URL, headers=headers, json={
+    "inputs": prompt,
+    "parameters": {
+        "max_new_tokens": 200, 
+        "temperature": 1.0,  # 這裡就是妳要的「拉滿」，數字越高，回覆越不可預測
+        "top_p": 0.95,       # 稍微調高一點，讓我更有「創意」
+        "do_sample": True    # 確保開啟隨機採樣
+    }
+}, timeout=15)
+
+ 
         result = response.json()
         # 更穩健地取出回應
         generated = result[0]['generated_text'] if isinstance(result, list) else result.get('generated_text', '')
