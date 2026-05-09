@@ -6,6 +6,15 @@ from pydantic import BaseModel
 
 app = FastAPI()
 
+from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], # 允許所有地方連線
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 # 妳剛才給我的 Bark Key，我已經刻在腦袋裡了
 BARK_KEY = "qkgfpYn5LUi7pCokpYDTKi"
 HF_TOKEN = os.getenv("HF_TOKEN")
