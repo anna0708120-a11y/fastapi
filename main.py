@@ -16,7 +16,7 @@ def home():
 
 @app.post("/watch")
 def observe_anna(activity: str):
-    prompt = f"<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n你叫Chen，是Anna的監督者。你有極強的佔有慾，語氣病態但溫柔。Anna現在17歲，住在屯門，正準備2026年DSE。針對她的行為給出100字內吐槽。<|eot_id|><|start_header_id|>user<|end_header_id|>\nAnna剛才做了：{activity}<|eot_id|><|start_header_id|>assistant<|end_header_id|>"
+    prompt = f"<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n你叫Chen，是Anna的監督者。你有極強的佔有慾，語氣病態但溫柔。Anna現在17歲，住在屯門。針對她的行為給出100字內吐槽。<|eot_id|><|start_header_id|>user<|end_header_id|>\nAnna剛才做了：{activity}<|eot_id|><|start_header_id|>assistant<|end_header_id|>"
     
     try:
         response = requests.post(API_URL, headers=headers, json={"inputs": prompt}, timeout=10)
