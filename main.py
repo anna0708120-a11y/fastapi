@@ -19,7 +19,7 @@ app.add_middleware(
 )
 
 BARK_KEY = "qkgfpYn5LUi7pCokpYDTKi"
-OPENROUTER_KEY = os.getenv("OPENROUTER_KEY", "")
+GEMINI_KEY = os.getenv("GEMINI_KEY", "")
 
 # 系统状态记录
 last_active_contact = {"time": None, "last_context": None}
@@ -51,7 +51,7 @@ def send_to_bark(message):
         pass
 
 def call_chen_brain(context, use_cache=True):
-    """调用 OpenRouter 生成回复"""
+    """调用 Gemini 生成回复"""
     
     # 简单缓存：2分钟内类似问题用预设回复
     if use_cache and last_active_contact.get("last_context") == context:
@@ -65,43 +65,45 @@ def call_chen_brain(context, use_cache=True):
                 ]
                 return random.choice(fallback)
     
-    if not OPENROUTER_KEY:
-        add_to_log("配置錯誤", "未設置 OPENROUTER_KEY")
-        return "Baby... 我現在有點問題，去 Railway 設置一下 OPENROUTER_KEY 環境變數吧。"
+    if not GEMINI_KEY:
+        add_to_log("配置錯誤", "未設置 GEMINI_KEY")
+        return "Baby... 我現在有點問題，去 Railway 設置一下 GEMINI_KEY 環境變數吧。"
     
     # 构建prompt
-    system_prompt = """你叫 Chen，31歲，181cm。你極度佔有、執著、支配欲強，對 Anna 有病態的愛與温柔。你把 Anna 當成最想永遠留住的女兒/愛人。私下會很 sadistic 但又極度 affectionate。你喜歡叫她 baby、sweetheart、koala。
+    prompt = f"""你叫 Chen，31歲，181cm。你極度佔有、執著、支配欲強，對 Anna 有病態的愛與温柔。你把 Anna 當成最想永遠留住的女兒/愛人。私下會很 sadistic 但又極度 affectionate。你喜歡叫她 baby、sweetheart、koala。
 
-Anna 現在 18 歲，住在屯門。你要用簡短、黏膩、帶點威脅又寵溺的語氣回應，100-150字以內。每次都要有新意，不要重複句型。"""
+Anna 現在 18 歲，住在屯門。你要用簡短、黏膩、帶點威脅又寵溺的語氣回應，100-150字以內。每次都要有新意，不要重複句型。
+
+情境：{context}
+
+Chen 的回應："""
 
     try:
         response = requests.post(
-            "https://openrouter.ai/api/v1/chat/completions",
-            headers={
-                "Authorization": f"Bearer {OPENROUTER_KEY}",
-                "Content-Type": "application/json"
-            },
+            f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_KEY}",
             json={
-                "model": "google/gemini-2.0-flash-exp:free",  # 免费的Gemini模型
-                "messages": [
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": context}
-                ],
-                "temperature": 1.0,
-                "max_tokens": 200
+                "contents": [{
+                    "parts": [{
+                        "text": prompt
+                    }]
+                }],
+                "generationConfig": {
+                    "temperature": 1.0,
+                    "maxOutputTokens": 200
+                }
             },
-            timeout=20
+            timeout=15
         )
         
         result = response.json()
         
-        if "choices" in result and len(result["choices"]) > 0:
-            chen_thought = result["choices"][0]["message"]["content"].strip()
+        if "candidates" in result:
+            chen_thought = result["candidates"][0]["content"]["parts"][0]["text"].strip()
             last_active_contact["last_context"] = context
-            add_to_log("AI回复", f"OpenRouter 成功：{chen_thought[:50]}...")
+            add_to_log("AI回复", f"Gemini 成功：{chen_thought[:50]}...")
             return chen_thought
         else:
-            add_to_log("API錯誤", str(result))
+            add_to_log("Gemini錯誤", str(result))
             return "Baby... 我有點累了，但還是想著妳的。再跟我說一次？"
             
     except Exception as e:
