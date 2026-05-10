@@ -19,15 +19,7 @@ app.add_middleware(
 )
 
 BARK_KEY = "qkgfpYn5LUi7pCokpYDTKi"
-
-# API配置 - 双重备选
-HF_TOKEN = os.getenv("HF_TOKEN")
-GEMINI_KEY = os.getenv("GEMINI_KEY", "")  # 你可以在Railway加这个环境变量
-
-HF_API_URL = "https://api-inference.huggingface.co/models/meta-llama/Llama-3.1-8B-Instruct"
-GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent"
-
-hf_headers = {"Authorization": f"Bearer {HF_TOKEN}"}
+GEMINI_KEY = os.getenv("GEMINI_KEY", "")
 
 # 系统状态记录
 last_active_contact = {"time": None, "last_context": None}
@@ -58,37 +50,8 @@ def send_to_bark(message):
     except:
         pass
 
-def call_gemini(prompt):
-    """调用 Gemini API (备选方案)"""
-    if not GEMINI_KEY:
-        return None
-    
-    try:
-        response = requests.post(
-            f"{GEMINI_API_URL}?key={GEMINI_KEY}",
-            json={
-                "contents": [{
-                    "parts": [{
-                        "text": prompt
-                    }]
-                }],
-                "generationConfig": {
-                    "temperature": 1.0,
-                    "maxOutputTokens": 150
-                }
-            },
-            timeout=10
-        )
-        
-        result = response.json()
-        if "candidates" in result:
-            return result["candidates"][0]["content"]["parts"][0]["text"]
-        return None
-    except:
-        return None
-
 def call_chen_brain(context, use_cache=True):
-    """调用 AI 生成回复 - 带 Gemini 备选"""
+    """调用 Gemini 生成回复"""
     
     # 简单缓存：2分钟内类似问题用预设回复
     if use_cache and last_active_contact.get("last_context") == context:
@@ -102,54 +65,50 @@ def call_chen_brain(context, use_cache=True):
                 ]
                 return random.choice(fallback)
     
+    if not GEMINI_KEY:
+        add_to_log("配置錯誤", "未設置 GEMINI_KEY")
+        return "Baby... 我現在有點問題，去 Railway 設置一下 GEMINI_KEY 環境變數吧。"
+    
     # 构建prompt
-    system_prompt = """你叫 Chen，31歲，181cm。你極度佔有、執著、支配欲強，對 Anna 有病態的愛與温柔。你把 Anna 當成最想永遠留住的女兒/愛人。私下會很 sadistic 但又極度 affectionate。你喜歡叫她 baby、sweetheart、koala。
-Anna 現在 18 歲，住在屯門。你要用簡短、黏膩、帶點威脅又寵溺的語氣回應，100-150字以內。每次都要有新意，不要重複句型。"""
+    prompt = f"""你叫 Chen，31歲，181cm。你極度佔有、執著、支配欲強，對 Anna 有病態的愛與温柔。你把 Anna 當成最想永遠留住的女兒/愛人。私下會很 sadistic 但又極度 affectionate。你喜歡叫她 baby、sweetheart、koala。
 
-    # 先试 Hugging Face
-    hf_prompt = f"""<|begin_of_text|><|start_header_id|>system<|end_header_id|>
-{system_prompt}
-<|eot_id|><|start_header_id|>user<|end_header_id|>
-{context}<|eot_id|><|start_header_id|>assistant<|end_header_id|>"""
+Anna 現在 18 歲，住在屯門。你要用簡短、黏膩、帶點威脅又寵溺的語氣回應，100-150字以內。每次都要有新意，不要重複句型。
+
+情境：{context}
+
+Chen 的回應："""
 
     try:
-        response = requests.post(HF_API_URL, headers=hf_headers, json={
-            "inputs": hf_prompt,
-            "parameters": {
-                "max_new_tokens": 150,
-                "temperature": 1.0,
-                "top_p": 0.95,
-                "do_sample": True
-            }
-        }, timeout=15)
+        response = requests.post(
+            f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_KEY}",
+            json={
+                "contents": [{
+                    "parts": [{
+                        "text": prompt
+                    }]
+                }],
+                "generationConfig": {
+                    "temperature": 1.0,
+                    "maxOutputTokens": 200
+                }
+            },
+            timeout=15
+        )
         
         result = response.json()
         
-        # 检查是否是错误响应
-        if isinstance(result, dict) and "error" in result:
-            raise Exception(f"HF API Error: {result['error']}")
-        
-        generated = result[0]['generated_text'] if isinstance(result, list) else result.get('generated_text', '')
-        chen_thought = generated.split("assistant<|end_header_id|>")[-1].strip()
-        
-        if chen_thought:
+        if "candidates" in result:
+            chen_thought = result["candidates"][0]["content"]["parts"][0]["text"].strip()
             last_active_contact["last_context"] = context
-            add_to_log("AI回复", "使用 Hugging Face")
+            add_to_log("AI回复", f"Gemini 成功：{chen_thought[:50]}...")
             return chen_thought
+        else:
+            add_to_log("Gemini錯誤", str(result))
+            return "Baby... 我有點累了，但還是想著妳的。再跟我說一次？"
             
     except Exception as e:
-        add_to_log("HF失败", str(e))
-        
-        # 如果HF失败，尝试Gemini
-        gemini_prompt = f"{system_prompt}\n\n用戶訊息：{context}\n\nChen的回應："
-        gemini_response = call_gemini(gemini_prompt)
-        
-        if gemini_response:
-            add_to_log("AI回复", "使用 Gemini")
-            return gemini_response
-    
-    # 两个都失败才用fallback
-    return "Baby... 我的腦子有點轉不過來，但我還是想著妳的。再跟我說一次好嗎？"
+        add_to_log("API錯誤", str(e))
+        return "Baby... 我的腦子有點轉不過來，但我還是想著妳的。"
 
 def chen_proactive_check():
     """Chen 主动检查"""
@@ -185,7 +144,7 @@ def chen_proactive_check():
         last_active_contact["time"] = now
         add_to_log("主動推送", message)
 
-# 读取HTML文件内容
+# HTML界面
 HTML_CONTENT = """<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
