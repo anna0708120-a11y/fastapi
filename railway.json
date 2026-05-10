@@ -1,9 +1,0 @@
-1. [获取URL的内容]
-   URL: https://fastapi-production-7b80.up.railway.app/watch
-   方法: POST
-   请求内文: JSON
-   
-   {
-     "activity": "打開了這個app",
-     "app_name": "WeChat"  
-   }
