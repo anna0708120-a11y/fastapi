@@ -602,22 +602,11 @@ def get_logs():
         "quota": daily_count.get("count", 0)
     }
 
-@app.post("/note")
-def add_note(content: dict):
-    add_chen_note(content.get("text", ""))
-    return {"status": "Success"}
-
-scheduler = BackgroundScheduler()
-scheduler.add_job(chen_proactive_check, 'interval', hours=2, jitter=1800)
-scheduler.start()
-
-
-
-@app.get("/")
 
 async def home():
 
     return {"status": "Lin AI online"}
+
 
 @app.post("/event")
 
@@ -634,6 +623,22 @@ async def event(req: Request):
     )
 
     return {"ok": True}
+
+
+
+
+
+
+@app.post("/note")
+def add_note(content: dict):
+    add_chen_note(content.get("text", ""))
+    return {"status": "Success"}
+
+scheduler = BackgroundScheduler()
+scheduler.add_job(chen_proactive_check, 'interval', hours=2, jitter=1800)
+scheduler.start()
+
+
 
 
 
