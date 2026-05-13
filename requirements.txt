@@ -2,4 +2,3 @@ fastapi
 uvicorn[standard]
 requests
 pydantic
-APScheduler==3.11.2.post1
