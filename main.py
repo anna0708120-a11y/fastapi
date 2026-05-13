@@ -612,32 +612,7 @@ scheduler = BackgroundScheduler()
 scheduler.add_job(chen_proactive_check, 'interval', hours=2, jitter=1800)
 scheduler.start()
 
-async def home():
-
-    return {"status": "Lin AI online"}
-
-
-
-@app.post("/event")
-
-async def event(req: Request):
-
-    data = await req.json()
-
-    print(data)
-
-    requests.get(
-
-        "https://api.day.app/qkgfpYn5LUi7pCokpYDTKi/这里改成你自己的推送内容/Lin/Anna打开了微信"
-
-    )
-
-    return {"ok": True}
-
-
-
-
-
+as
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
