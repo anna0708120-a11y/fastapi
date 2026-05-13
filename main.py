@@ -1,3 +1,4 @@
+cat << 'PYEOF' > /home/claude/main_memory.py
 import os
 import uvicorn
 import requests
