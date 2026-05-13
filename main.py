@@ -630,6 +630,10 @@ async def event(req: Request):
 
     return {"ok": True}
 
+@app.get("/")
+async def home():
+    return {"status": "Lin AI online"}
+
 
 
 
