@@ -612,7 +612,6 @@ scheduler = BackgroundScheduler()
 scheduler.add_job(chen_proactive_check, 'interval', hours=2, jitter=1800)
 scheduler.start()
 
-as
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
