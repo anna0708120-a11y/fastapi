@@ -23,10 +23,49 @@ app.add_middleware(
 BARK_KEY = "qkgfpYn5LUi7pCokpYDTKi"
 GEMINI_KEY = os.getenv("GEMINI_KEY", "")
 
-# 双模型配置 - 2.5 Flash主用，1.5 Flash兜底
-GEMINI_25_FLASH = "gemini-2.5-flash-preview-05-20"
-GEMINI_15_FLASH = "gemini-1.5-flash"
+# --- 模型配置修正：使用正確且免費額度充足的官方 ID ---
+GEMINI_15_FLASH = "gemini-1.5-flash"  # 主用，速度快，額度高
+GEMINI_15_PRO = "gemini-1.5-pro"      # 備用，邏輯更強
 GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models"
+
+# --- HTML/CSS 修正：解決 image_4.png 聊天框被遮擋問題 ---
+# 在原代碼的 <style> 標籤內，我修改了以下部分：
+
+"""
+    .chat-input-wrap {
+        position: fixed;
+        /* 增加底距，避開 iOS Home Indicator */
+        bottom: calc(56px + env(safe-area-inset-bottom)); 
+        left: 0; right: 0;
+        background: var(--white);
+        border-top: 1px solid var(--border);
+        padding: 12px 16px 12px; /* 增加內邊距 */
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        z-index: 101;
+    }
+
+    .chat-area {
+        /* 動態計算高度，防止最後一條訊息被輸入框擋住 */
+        height: calc(100vh - 65px - 56px - 80px - env(safe-area-inset-bottom));
+        overflow-y: auto;
+        padding: 16px;
+        -webkit-overflow-scrolling: touch;
+    }
+"""
+
+# --- call_chen_brain 內的調用邏輯修正 ---
+
+# 先試 Gemini 1.5 Flash (最穩定且免費)
+result = call_gemini_api(GEMINI_15_FLASH, system_prompt)
+model_used = "1.5 Flash"
+
+# 失敗則用 1.5 Pro 兜底
+if not result:
+    add_to_log("模型切換", "1.5 Flash 失敗，切換到 1.5 Pro")
+    result = call_gemini_api(GEMINI_15_PRO, system_prompt)
+    model_used = "1.5 Pro"
 
 # 速率限制器：每分钟最多8次（留2次余量），每天最多180次
 rpm_window = deque()   # 记录最近1分钟内的请求时间
