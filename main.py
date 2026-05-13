@@ -620,6 +620,10 @@ async def event(req: Request):
 
     return {"ok": True}
 
+requests.get(
+  f"https://api.day.app/{https://api.day.app/qkgfpYn5LUi7pCokpYDTKi/}/Lin/Anna打开了微信"
+)
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
     uvicorn.run(app, host="0.0.0.0", port=port)
