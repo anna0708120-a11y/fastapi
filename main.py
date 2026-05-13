@@ -611,19 +611,26 @@ scheduler = BackgroundScheduler()
 scheduler.add_job(chen_proactive_check, 'interval', hours=2, jitter=1800)
 scheduler.start()
 
+from fastapi import FastAPI, Request
+import requests
 
+app = FastAPI()
+
+BARK_KEY = "你的BarkKey"
 
 @app.post("/event")
 async def event(req: Request):
+
     data = await req.json()
 
     print(data)
 
+    requests.get(
+        f"https://api.day.app/qkgfpYn5LUi7pCokpYDTKi/Lin/Anna打开了微信"
+    )
+
     return {"ok": True}
 
-requests.get(
-  f"https://api.day.app/{https://api.day.app/qkgfpYn5LUi7pCokpYDTKi/}/Lin/Anna打开了微信"
-)
 
 
 
