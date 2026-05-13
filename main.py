@@ -158,7 +158,7 @@ def call_groq_api(prompt_text):
         add_to_log("Groq异常", str(e))
         return None
 
-def call_chen_brain(context, app_name=None, use_cache=True):
+def call_chen_brain(context, app_name=None, use_cache=True)now = datetime.now():
 
     if use_cache and last_active_contact.get("last_context") == context:
         if last_active_contact.get("time"):
@@ -232,8 +232,8 @@ Lin討厭的：
 对话回复10-60字。不要重复句型。回复用中文。"""
 
     result = call_groq_api(system_prompt)
+    model_used = "llama-3.3-70b-versatile"
 
-     记录请求
     rpm_window.append(datetime.now())
     daily_count["count"] += 1
 
