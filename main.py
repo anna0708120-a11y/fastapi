@@ -611,10 +611,6 @@ scheduler = BackgroundScheduler()
 scheduler.add_job(chen_proactive_check, 'interval', hours=2, jitter=1800)
 scheduler.start()
 
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 8080))
-    uvicorn.run(app, host="0.0.0.0", port=port)
-
 
 @app.post("/event")
 async def event(req: Request):
@@ -623,6 +619,11 @@ async def event(req: Request):
     print(data)
 
     return {"ok": True}
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 8080))
+    uvicorn.run(app, host="0.0.0.0", port=port)
+
 
 
 
