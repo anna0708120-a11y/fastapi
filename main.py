@@ -612,6 +612,32 @@ scheduler.add_job(chen_proactive_check, 'interval', hours=2, jitter=1800)
 scheduler.start()
 
 
+
+@app.get("/")
+
+async def home():
+
+    return {"status": "Lin AI online"}
+
+@app.post("/event")
+
+async def event(req: Request):
+
+    data = await req.json()
+
+    print(data)
+
+    requests.get(
+
+        "https://api.day.app/qkgfpYn5LUi7pCokpYDTKi/这里改成你自己的推送内容/Lin/Anna打开了微信"
+
+    )
+
+    return {"ok": True}
+
+
+
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
     uvicorn.run(app, host="0.0.0.0", port=port)
