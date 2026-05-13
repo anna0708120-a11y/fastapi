@@ -413,7 +413,7 @@ HTML_CONTENT = """<!DOCTYPE html>
             <div class="cat-head"><div class="cat-ear-l"></div><div class="cat-ear-r"></div><div class="cat-eye-l"></div><div class="cat-eye-r"></div><div class="cat-nose"></div></div>
             <div class="cat-body"><div class="cat-tail"></div></div>
         </div>
-        <div class="header-text"><h1>Chen</h1><p>正在看著妳</p></div>
+        <div class="header-text"><h1>Lin</h1><p>正在看著妳</p></div>
     </div>
     <div class="status-pill"><div class="pulse-dot"></div>在線</div>
 </div>
@@ -433,7 +433,7 @@ HTML_CONTENT = """<!DOCTYPE html>
         <div id="logs-container"><div class="empty-state"><div class="empty-emoji">📡</div>等待監控觸發...</div></div>
     </div>
     <div class="card">
-        <div class="card-label">Chen 的碎碎念</div>
+        <div class="card-label">Lin 的碎碎念</div>
         <div id="notes-container"><div class="empty-state"><div class="empty-emoji">🖤</div>Chen 還沒有留下紀錄</div></div>
     </div>
     <div class="watermark">Property of Chen · <span id="current-time"></span></div>
