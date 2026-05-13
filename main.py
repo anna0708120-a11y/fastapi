@@ -614,9 +614,8 @@ scheduler.start()
 from fastapi import FastAPI, Request
 import requests
 
-app = FastAPI()
 
-BARK_KEY = "你的BarkKey"
+app = FastAPI()
 
 @app.post("/event")
 async def event(req: Request):
