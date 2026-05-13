@@ -158,7 +158,8 @@ def call_groq_api(prompt_text):
         add_to_log("Groq异常", str(e))
         return None
 
-def call_chen_brain(context, app_name=None, use_cache=True)now = datetime.now():
+def call_chen_brain(context, app_name=None, use_cache=True)：
+now = datetime.now():
 
     if use_cache and last_active_contact.get("last_context") == context:
         if last_active_contact.get("time"):
