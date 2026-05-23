@@ -21,9 +21,9 @@ app.add_middleware(
 )
 
 BARK_KEY = "qkgfpYn5LUi7pCokpYDTKi"
-GROQ_API_KEY = os.getenv("GROQ_KEY", "")
-GROQ_MODEL = "llama-3.3-70b-versatile"
-GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
+OPENAI_API_KEY = os.getenv("Open_Key", "")
+OPENAI_MODEL = "gpt-4.5-preview"
+OPENAI_URL = "https://api.openai.com/v1/chat/completions"
 
 rpm_window = deque()
 daily_count = {"date": None, "count": 0}
@@ -103,17 +103,16 @@ def update_app_cooldown(app_name):
     if app_name:
         app_cooldowns[app_name] = datetime.now()
 
-
-def call_groq_api(prompt_text):
+def call_openai_api(prompt_text):
     try:
         response = requests.post(
-            GROQ_URL,
+            OPENAI_URL,
             headers={
-                "Authorization": f"Bearer {GROQ_API_KEY}",
+                "Authorization": f"Bearer {OPENAI_API_KEY}",
                 "Content-Type": "application/json"
             },
             json={
-                "model": GROQ_MODEL,
+                "model": OPENAI_MODEL,
                 "messages": [{"role": "system", "content": prompt_text}],
                 "temperature": 0.95,
                 "max_tokens": 180,
@@ -126,9 +125,9 @@ def call_groq_api(prompt_text):
             return result["choices"][0]["message"]["content"].strip()
         return None
     except Exception as e:
-        add_to_log("Groq异常", str(e))
+        add_to_log("OpenAI異常", str(e))
         return None
-
+        
 
 def call_chen_brain(context, app_name=None, use_cache=True):
     now = datetime.now()
@@ -137,8 +136,8 @@ def call_chen_brain(context, app_name=None, use_cache=True):
             if datetime.now() - last_active_contact["time"] < timedelta(minutes=2):
                 return random.choice(["还没走远。", "嗯。", "我看着你。"]), None
 
-    if not GROQ_API_KEY:
-        return "你还没设置 GROQ_KEY。", None
+    if not OPENAI_API_KEY:
+        return "你還沒設置 Open_Key。", None
     if not check_rate_limit():
         return "今天额度用完了。", None
 
@@ -218,8 +217,8 @@ def call_chen_brain(context, app_name=None, use_cache=True):
         f"情境：{context}"""
     )
 
-    result = call_groq_api(system_prompt)
-    model_used = "llama-3.3-70b-versatile"
+    result = call_openai_api(system_prompt)
+    model_used = "gpt-4.5-preview"
     rpm_window.append(datetime.now())
     daily_count["count"] += 1
 
