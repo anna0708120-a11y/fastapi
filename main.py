@@ -21,9 +21,9 @@ app.add_middleware(
 )
 
 BARK_KEY = "qkgfpYn5LUi7pCokpYDTKi"
-GROQ_API_KEY = os.getenv("GROQ_KEY", "")
-GROQ_MODEL = "llama-3.3-70b-versatile"
-GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
+Deepseek_key = os.getenv("Deepseek_key", "")
+DEEPSEEK_MODEL = "deepseek-reasoner"
+DEEPSEEK_URL = "https://api.deepseek.com/v1/chat/completions"
 
 rpm_window = deque()
 daily_count = {"date": None, "count": 0}
@@ -113,7 +113,7 @@ def call_groq_api(prompt_text):
                 "Content-Type": "application/json"
             },
             json={
-                "model": GROQ_MODEL,
+                "model": DEEPSEEK_MODEL,
                 "messages": [{"role": "system", "content": prompt_text}],
                 "temperature": 0.95,
                 "max_tokens": 180,
@@ -126,7 +126,7 @@ def call_groq_api(prompt_text):
             return result["choices"][0]["message"]["content"].strip()
         return None
     except Exception as e:
-        add_to_log("Groq异常", str(e))
+        add_to_log("Deepseek异常", str(e))
         return None
 
 
@@ -137,8 +137,8 @@ def call_chen_brain(context, app_name=None, use_cache=True):
             if datetime.now() - last_active_contact["time"] < timedelta(minutes=2):
                 return random.choice(["还没走远。", "嗯。", "我看着你。"]), None
 
-    if not GROQ_API_KEY:
-        return "你还没设置 GROQ_KEY。", None
+    if not Deepseek_key:
+        return "你还没设置 Deepseek_key。", None
     if not check_rate_limit():
         return "今天额度用完了。", None
 
